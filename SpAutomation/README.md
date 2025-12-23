@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📧 SP Automation – Document Email System
 
-## Getting Started
+A business-grade web application for uploading PDF documents (Quotation / Invoice / Tax Invoice),
+extracting customer data, managing recipient emails, and sending emails with proper email threading
+(Quotation → PO → Invoice → Receipt).
 
-First, run the development server:
+Built with **Next.js + Prisma + Nodemailer**.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ✨ Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- 📄 Upload PDF (first file must be PDF, others optional)
+- 🔍 Extract data from PDF
+  - Document type (Quotation / Invoice / Receipt)
+  - Document ID (QT-XXXXXXXXX, IN-XXXXXXXXX, RE-XXXXXXXXX)
+  - Tax ID
+  - Order list (with sub-orders)
+- 👤 Customer management
+  - Auto-check user by Tax ID
+  - Create new user if not found
+  - Multiple email addresses per customer
+- 📧 Email sending
+  - HTML email template (business style)
+  - Attach PDF and other files
+  - Embedded logo & bank book image (CID)
+- 🔁 Email threading
+  - Reply Quotation → Send Invoice in the same email thread
+  - Uses Message-ID, In-Reply-To, References
+- 🗂 Database tracking
+  - Store Message-ID per document
+  - Keep email history consistent
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🧱 Tech Stack
 
-To learn more about Next.js, take a look at the following resources:
+- **Frontend**
+  - Next.js (App Router)
+  - React
+  - Tailwind CSS
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Backend**
+  - Next.js API Routes
+  - Prisma ORM
+  - Nodemailer
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Database**
+  - PostgreSQL / MySQL / SQLite (via Prisma)
 
-## Deploy on Vercel
+- **Email**
+  - Gmail SMTP (App Password)
+  - HTML Email (table-based, email-safe)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📁 Project Structure
+
+.
+├── app/
+│ ├── api/
+│ │ ├── readPDF/ # Extract text from PDF
+│ │ ├── user/ # Check / create / update users
+│ │ ├── send-email/ # Send email (thread-aware)
+│ └── page.tsx # Upload & flow UI
+│
+├── components/
+│ ├── AddUserModal.tsx
+│ ├── EmailSelectionModal.tsx
+│
+├── prisma/
+│ ├── schema.prisma
+│
+├── public/
+│ ├── logo.png
+│ ├── bookbank.png
+│
+├── README.md
+
+
+
+---
+
+## 🗄 Database Schema (Prisma)
+
+```prisma
+model User {
+  id     Int      @id @default(autoincrement())
+  taxId  String   @unique
+  name   String
+  emails String[]
+}
+
+model Quotation {
+  id  Int    @id @default(autoincrement())
+  QID String @unique
+  MID String
+}
+
+model Invoice {
+  id  Int    @id @default(autoincrement())
+  IID String @unique
+  MID String
+}
