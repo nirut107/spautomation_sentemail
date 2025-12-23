@@ -16,7 +16,7 @@ export default function Home() {
 
   useEffect(() => {
     console.log(title, taxId, files, orders);
-  }, [title, taxId, files, orders]);
+  }, [title]);
   const showEmailSelectionModal = (emails: string[]) => {
     setExistingEmails(emails);
     setModalOpenSent(true);
