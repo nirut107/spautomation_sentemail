@@ -241,7 +241,7 @@ export default function Home() {
       const data = await resuser.json();
       console.log(data);
       if (!data.exists) {
-        if (foundTaxId) openAddUserModal(taxId);
+        if (foundTaxId) openAddUserModal(foundTaxId);
       } else {
         setTaxId(data.taxId);
         console.log(data.taxId);
