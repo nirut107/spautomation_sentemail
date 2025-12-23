@@ -21,7 +21,7 @@ model User {
 
 model Quotation {
   id        Int     @id @default(autoincrement())
-  QID       String @unique
+  QID       String
   MID       String
   subject   String
 }

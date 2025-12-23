@@ -13,6 +13,8 @@ export default function Home() {
   const [docID, setDocID] = useState<string[]>([]);
   const [title, setTitle] = useState<string>("");
   const [orders, setOrder] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [creating, setCreat] = useState(false);
 
   useEffect(() => {
     console.log(title, taxId, files, orders);
@@ -28,13 +30,16 @@ export default function Home() {
   };
 
   const closeModal = () => {
+    setLoading(false);
     setModalOpen(false);
   };
   const closeModalSent = () => {
+    setLoading(false);
     setModalOpenSent(false);
   };
 
   const handleCreateUser = async (emails: string[]) => {
+    setCreat(true);
     try {
       await fetch("/api/user/create", {
         method: "POST",
@@ -45,6 +50,8 @@ export default function Home() {
     } catch (err) {
       console.log(err);
       closeModal();
+    } finally {
+      setCreat(false);
     }
   };
 
@@ -68,20 +75,27 @@ export default function Home() {
     docID.forEach((docID: string) => {
       form.append("DocID", docID);
     });
+    try {
+      const res = await fetch("/api/send-email", {
+        method: "POST",
+        body: form,
+      });
 
-    const res = await fetch("/api/send-email", {
-      method: "POST",
-      body: form,
-    });
+      const data = await res.json();
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.error || "Failed to send email");
-      return;
+      if (!res.ok) {
+        alert(data.error || "Failed to send email");
+        setLoading(false);
+        setModalOpenSent(false);
+        return;
+      }
+      alert("Email sent successfully!");
+    } catch (err) {
+      console.log(err);
     }
-
-    alert("Email sent successfully!");
+    setLoading(false);
+    setModalOpenSent(false);
+    
   };
 
   const handleSubmitEmailSelection = async (
@@ -101,9 +115,7 @@ export default function Home() {
         console.log(error);
       }
     }
-    setModalOpenSent(false);
-
-    sendEmail(selected, newEmails);
+    await sendEmail(selected, newEmails);
   };
 
   const handleFiles = (uploaded: FileList | null) => {
@@ -151,7 +163,8 @@ export default function Home() {
   };
 
   const handleNext = async () => {
-    if (files.length === 0) return;
+    if (files.length === 0 || loading) return;
+    setLoading(true);
 
     const form = new FormData();
     form.append("file", files[0]);
@@ -240,6 +253,7 @@ export default function Home() {
       });
       const data = await resuser.json();
       console.log(data);
+
       if (!data.exists) {
         if (foundTaxId) openAddUserModal(foundTaxId);
       } else {
@@ -339,16 +353,41 @@ export default function Home() {
         <div className="flex justify-end">
           <button
             onClick={handleNext}
-            disabled={files.length === 0}
-            className="
-          px-6 py-3 rounded-lg font-medium
-          bg-blue-600 text-white
-          hover:bg-blue-700
-          disabled:bg-gray-300 disabled:cursor-not-allowed
-          transition
-        "
+            disabled={files.length === 0 || loading}
+            className={`
+      px-6 py-3 rounded-lg font-medium
+      flex items-center gap-2
+      ${
+        loading
+          ? "bg-gray-400 cursor-not-allowed"
+          : "bg-blue-600 hover:bg-blue-700"
+      }
+      text-white transition
+    `}
           >
-            Continue
+            {loading && (
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
+              </svg>
+            )}
+
+            {loading ? "Processing..." : "Continue"}
           </button>
         </div>
 

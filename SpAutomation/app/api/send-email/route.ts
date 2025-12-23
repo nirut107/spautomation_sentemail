@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
         where: { QID: previousDocId },
       });
       replyMID = q?.MID ?? null;
-      if (q?.subject) subject = q.subject
+      if (q?.subject) subject = q.subject;
     }
 
     if (previousDocId.startsWith("IN-")) {
@@ -30,7 +30,22 @@ export async function POST(req: NextRequest) {
         where: { IID: previousDocId },
       });
       replyMID = i?.MID ?? null;
-      if (i?.subject) subject = i.subject
+      if (i?.subject) subject = i.subject;
+    }
+  } else {
+    const DocId = DocID[0];
+
+    if (DocId.startsWith("QT-")) {
+      const q = await prisma.quotation.findUnique({
+        where: { QID: DocId },
+      });
+      replyMID = q?.MID ?? null;
+      if (replyMID) {
+        return NextResponse.json(
+          { error: "This email has already been sent previously." },
+          { status: 400 }
+        );
+      }
     }
   }
   replyMID = replyMID?.trim().replace(/^"+|"+$/g, "") || null;
@@ -76,24 +91,31 @@ export async function POST(req: NextRequest) {
   });
   const newMID = info.messageId;
   const newDocId = DocID[0];
-  if (newDocId.startsWith("QT-")) {
-    await prisma.quotation.create({
-      data: {
-        QID: newDocId,
-        MID: newMID,
-        subject: subject,
-      },
-    });
-  }
+  try {
+    if (newDocId.startsWith("QT-")) {
+      await prisma.quotation.create({
+        data: {
+          QID: newDocId,
+          MID: newMID,
+          subject: subject,
+        },
+      });
+    }
 
-  if (newDocId.startsWith("IN-")) {
-    await prisma.invoice.create({
-      data: {
-        IID: newDocId,
-        MID: newMID,
-        subject: subject,
-      },
-    });
+    if (newDocId.startsWith("IN-")) {
+      await prisma.invoice.create({
+        data: {
+          IID: newDocId,
+          MID: newMID,
+          subject: subject,
+        },
+      });
+    }
+  } catch {
+    return NextResponse.json(
+      { error: "This Email have already sent before" },
+      { status: 400 }
+    );
   }
 
   return NextResponse.json({ success: true });

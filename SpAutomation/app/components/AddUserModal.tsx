@@ -4,7 +4,7 @@ import { useState } from "react";
 interface AddUserModalProps {
   taxId: string;
   onClose: () => void;
-  onSubmit: (emails: string[]) => void;
+  onSubmit: (emails: string[]) => Promise<void>;
 }
 
 export default function AddUserModal({
@@ -13,6 +13,7 @@ export default function AddUserModal({
   onSubmit,
 }: AddUserModalProps) {
   const [emails, setEmails] = useState<string[]>([""]);
+  const [loading, setLoading] = useState(false);
 
   const updateEmail = (index: number, value: string) => {
     const updated = [...emails];
@@ -28,9 +29,16 @@ export default function AddUserModal({
     setEmails(emails.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (loading) return;
+    setLoading(true);
     const valid = emails.filter((e) => e.trim() !== "");
-    onSubmit(valid);
+    try {
+      await onSubmit(valid);
+    } catch {
+    } finally {
+      setLoading(false);
+    }
   };
 
   const inputClass = `
@@ -117,14 +125,42 @@ export default function AddUserModal({
 
           <button
             onClick={handleSubmit}
-            className="
-          px-5 py-2 rounded-md
-          bg-blue-600 text-white
-          text-sm font-medium
-          hover:bg-blue-700
-        "
+            disabled={loading}
+            className={`
+    px-5 py-2 rounded-md
+    flex items-center gap-2
+    text-sm font-medium text-white
+    transition
+    ${
+      loading
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-blue-600 hover:bg-blue-700"
+    }
+  `}
           >
-            Create
+            {loading && (
+              <svg
+                className="animate-spin h-4 w-4 text-white"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
+              </svg>
+            )}
+
+            {loading ? "Sending..." : "Create"}
           </button>
         </div>
       </div>

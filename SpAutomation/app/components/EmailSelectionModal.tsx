@@ -4,7 +4,7 @@ import { useState } from "react";
 interface EmailSelectionModalProps {
   emails: string[];
   onClose: () => void;
-  onSubmit: (selected: string[], newEmails: string[]) => void;
+  onSubmit: (selected: string[], newEmails: string[]) => Promise<void>;
 }
 
 export default function EmailSelectionModal({
@@ -14,6 +14,7 @@ export default function EmailSelectionModal({
 }: EmailSelectionModalProps) {
   const [selected, setSelected] = useState<string[]>([...emails]);
   const [newEmails, setNewEmails] = useState<string[]>([""]);
+  const [loading, setLoading] = useState(false);
 
   const toggleEmail = (email: string) => {
     setSelected((prev) =>
@@ -35,9 +36,16 @@ export default function EmailSelectionModal({
     setNewEmails(newEmails.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (loading) return;
+    setLoading(true);
     const filtered = newEmails.filter((e) => e.trim() !== "");
-    onSubmit(selected, filtered);
+    try {
+      await onSubmit(selected, filtered);
+    } catch {
+    } finally {
+      setLoading(false);
+    }
   };
   const inputClass = `
   w-full rounded-md border border-gray-300
@@ -148,14 +156,42 @@ export default function EmailSelectionModal({
 
           <button
             onClick={handleSubmit}
-            className="
-          px-5 py-2 rounded-md
-          bg-blue-600 text-white
-          text-sm font-medium
-          hover:bg-blue-700
-        "
+            disabled={loading}
+            className={`
+    px-5 py-2 rounded-md
+    flex items-center gap-2
+    text-sm font-medium text-white
+    transition
+    ${
+      loading
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-blue-600 hover:bg-blue-700"
+    }
+  `}
           >
-            Continue
+            {loading && (
+              <svg
+                className="animate-spin h-4 w-4 text-white"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
+              </svg>
+            )}
+
+            {loading ? "Sending..." : "Send"}
           </button>
         </div>
       </div>
