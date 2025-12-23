@@ -56,26 +56,29 @@ Built with **Next.js + Prisma + Nodemailer**.
 
 ## 📁 Project Structure
 
+```text
 .
 ├── app/
-│ ├── api/
-│ │ ├── readPDF/ # Extract text from PDF
-│ │ ├── user/ # Check / create / update users
-│ │ ├── send-email/ # Send email (thread-aware)
-│ └── page.tsx # Upload & flow UI
+│   ├── api/
+│   │   ├── readPDF/            # Extract text from PDF
+│   │   ├── user/               # Check / create / update users
+│   │   └── send-email/         # Send email (thread-aware)
+│   │
+│   └── page.tsx                # Upload & document flow UI
 │
 ├── components/
-│ ├── AddUserModal.tsx
-│ ├── EmailSelectionModal.tsx
+│   ├── AddUserModal.tsx        # Create new customer & emails
+│   └── EmailSelectionModal.tsx # Select / add recipient emails
 │
 ├── prisma/
-│ ├── schema.prisma
+│   └── schema.prisma           # Prisma database schema
 │
 ├── public/
-│ ├── logo.png
-│ ├── bookbank.png
+│   ├── logo.png                # Company logo (email CID)
+│   └── bookbank.png            # Bank book image (payment reference)
 │
-├── README.md
+└── README.md
+```
 
 
 
@@ -102,3 +105,107 @@ model Invoice {
   IID String @unique
   MID String
 }
+```
+---
+## 🔐 Environment Variables
+
+---
+```env
+DATABASE_URL=postgresql://user:password@localhost:5432/dbname
+
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=sp.automationsoftware.co@gmail.com
+SMTP_PASS=YOUR_GMAIL_APP_PASSWORD
+```
+---
+
+
+## ▶️ Getting Started
+### 1️⃣ Install dependencies
+```bash 
+npm install
+```
+
+## 2️⃣ Setup database
+```bash
+npx prisma migrate dev
+npx prisma generate
+```
+
+## 3️⃣ Run development server
+```bash
+npm run dev
+```
+
+Open:
+👉 http://localhost:3000
+
+---
+
+## 🔁 Email Thread Flow (Important)
+
+```text
+Send Quotation
+→ Save Message-ID (QT)
+
+Customer replies with PO
+
+Reply to Quotation
+→ Send Invoice
+→ Use In-Reply-To + References
+→ Save Message-ID (IN)
+
+Reply again
+→ Send Receipt
+→ Same email thread
+```
+
+### This ensures:
+```text
+
+Gmail / Outlook keep the same conversation
+
+Customers and accounting teams are not confused
+```
+
+## 🧠 Key Notes
+```text
+
+Email threading depends on:
+
+Same sender
+
+Same recipient
+
+Same subject (with Re:)
+
+Correct Message-ID headers
+
+HTML email uses table-based layout (no flexbox)
+
+React state is async – avoid using state immediately after setState
+```
+
+---
+## 🚀 Future Improvements
+```text
+
+PDF preview before sending
+
+Stepper UI (Upload → Review → Send)
+
+Email history per customer
+
+Payment status tracking
+
+Dashboard & reports
+```
+
+## 👨‍💻 Author
+```text
+SP Automation and Software Engineer Co., Ltd.
+📧 sp.automationsoftware.co@gmail.com
+
+📞 097-453-5296
+```
