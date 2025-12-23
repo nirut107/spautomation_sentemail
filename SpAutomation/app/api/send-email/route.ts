@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import nodemailer from "nodemailer";
-import fs from "fs";
 
 export async function POST(req: NextRequest) {
   const form = await req.formData();
