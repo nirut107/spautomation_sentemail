@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 
 export async function PUT(req: NextRequest) {
   try {
-    const { taxId, emails } = await req.json();
+    const { taxId, emails, name } = await req.json();
     console.log(taxId, emails);
     if (!taxId || !emails || !Array.isArray(emails)) {
       return NextResponse.json(
@@ -28,6 +28,7 @@ export async function PUT(req: NextRequest) {
         },
       },
       create: {
+        name,
         taxId,
         emails: filtered,
       },

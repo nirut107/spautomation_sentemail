@@ -22,6 +22,8 @@ model User {
 
 model Quotation {
   id        Int     @id @default(autoincrement())
+  taxId     String
+  company   String
   QID       String  @unique
   MID       String
   subject   String
@@ -29,7 +31,17 @@ model Quotation {
 
 model Invoice {
   id        Int     @id @default(autoincrement())
+  OID       String
   IID       String 
   MID       String
   subject   String
 }
+
+model Reciept {
+  id        Int     @id @default(autoincrement())
+  IID       String
+  RID       String
+  MID       String
+  subject   String
+}
+

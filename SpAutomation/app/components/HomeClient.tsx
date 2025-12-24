@@ -118,6 +118,7 @@ export default function Home() {
           body: JSON.stringify({
             taxId,
             emails: newEmails,
+            name,
           }),
         });
       } catch (error) {
