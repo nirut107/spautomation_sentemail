@@ -75,6 +75,8 @@ export default function Home() {
     form.append("to", JSON.stringify(allEmails));
     form.append("subject", subject);
     form.append("message", htmlMessage);
+    form.append("name", name);
+    form.append("taxID", taxId);
 
     files.forEach((file: File) => {
       form.append("files", file);
@@ -85,6 +87,9 @@ export default function Home() {
     try {
       const res = await fetch("/api/send-email", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
         body: form,
       });
 

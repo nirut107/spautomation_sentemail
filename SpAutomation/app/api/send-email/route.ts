@@ -9,6 +9,8 @@ export async function POST(req: NextRequest) {
   let subject = form.get("subject") as string;
   const message = form.get("message") as string;
   const DocID = form.getAll("DocID") as string[];
+  const company = form.get("name") as string;
+  const taxId = form.get("taxId") as string;
 
   console.log(DocID);
   let isReply = DocID.length === 2;
@@ -107,6 +109,8 @@ export async function POST(req: NextRequest) {
       } else {
         await prisma.quotation.create({
           data: {
+            taxId,
+            company,
             QID: newDocId,
             MID: newMID,
             subject,
@@ -116,7 +120,17 @@ export async function POST(req: NextRequest) {
     } else if (newDocId.startsWith("IN-")) {
       await prisma.invoice.create({
         data: {
+          OID: DocID[1],
           IID: newDocId,
+          MID: newMID,
+          subject: subject,
+        },
+      });
+    } else if (newDocId.startsWith("RE-")) {
+      await prisma.reciept.create({
+        data: {
+          IID: DocID[1],
+          RID: newDocId,
           MID: newMID,
           subject: subject,
         },
