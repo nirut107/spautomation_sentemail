@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   let replyMID: string | null = null;
 
   if (isReply) {
-    const previousDocId = DocID[1];
+    const previousDocId: string = DocID[1];
 
     if (previousDocId.startsWith("QT-")) {
       const q = await prisma.quotation.findUnique({
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
       if (i?.subject) subject = i.subject;
     }
   } else {
-    const DocId = DocID[0];
+    const DocId: string = DocID[0];
 
     if (DocId.startsWith("QT-")) {
       const q = await prisma.quotation.findUnique({
