@@ -32,21 +32,6 @@ export async function POST(req: NextRequest) {
       replyMID = i?.MID ?? null;
       if (i?.subject) subject = i.subject;
     }
-  } else {
-    const DocId: string = DocID[0];
-
-    if (DocId.startsWith("QT-")) {
-      const q = await prisma.quotation.findUnique({
-        where: { QID: DocId },
-      });
-      replyMID = q?.MID ?? null;
-      if (replyMID) {
-        return NextResponse.json(
-          { error: "This email has already been sent previously." },
-          { status: 400 }
-        );
-      }
-    }
   }
   replyMID = replyMID?.trim().replace(/^"+|"+$/g, "") || null;
   const files = form.getAll("files") as File[];
@@ -93,13 +78,27 @@ export async function POST(req: NextRequest) {
   const newDocId = DocID[0];
   try {
     if (newDocId.startsWith("QT-")) {
-      await prisma.quotation.create({
-        data: {
-          QID: newDocId,
-          MID: newMID,
-          subject: subject,
-        },
+      const existing = await prisma.quotation.findUnique({
+        where: { QID: newDocId },
       });
+
+      if (existing) {
+        await prisma.quotation.update({
+          where: { QID: newDocId },
+          data: {
+            MID: newMID,
+            subject,
+          },
+        });
+      } else {
+        await prisma.quotation.create({
+          data: {
+            QID: newDocId,
+            MID: newMID,
+            subject,
+          },
+        });
+      }
     }
 
     if (newDocId.startsWith("IN-")) {
