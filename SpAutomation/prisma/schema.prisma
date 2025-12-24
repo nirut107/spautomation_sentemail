@@ -16,6 +16,7 @@ datasource db {
 model User {
   id        Int     @id @default(autoincrement())
   taxId     String  @unique
+  name      String
   emails    String[]
 }
 

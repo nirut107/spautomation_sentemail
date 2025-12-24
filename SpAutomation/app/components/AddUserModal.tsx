@@ -1,14 +1,17 @@
 "use client";
+import { strict } from "assert";
 import { useState } from "react";
 
 interface AddUserModalProps {
   taxId: string;
+  name: string;
   onClose: () => void;
   onSubmit: (emails: string[]) => Promise<void>;
 }
 
 export default function AddUserModal({
   taxId,
+  name,
   onClose,
   onSubmit,
 }: AddUserModalProps) {
@@ -65,8 +68,11 @@ export default function AddUserModal({
         <div className="px-6 py-4 space-y-4">
           {/* Tax ID */}
           <div className="bg-gray-50 rounded-md px-4 py-2 text-sm">
-            <span className="text-gray-500">Tax ID</span>
-            <div className="font-semibold text-gray-800 mt-1">{taxId}</div>
+            <span className="text-gray-500">Tax ID : </span>
+            <span className="font-semibold text-gray-800 mt-1">{taxId}</span><br/>
+
+            <span className="text-gray-500">Customer Name : </span>
+            <span className="font-semibold text-gray-800 mt-1">{name}</span>
           </div>
 
           {/* Emails */}

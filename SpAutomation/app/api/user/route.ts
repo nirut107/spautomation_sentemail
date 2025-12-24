@@ -16,5 +16,6 @@ export async function POST(req: NextRequest) {
     exists: true,
     taxId: user.taxId,
     emails: user.emails,
+    name: user.name,
   });
 }

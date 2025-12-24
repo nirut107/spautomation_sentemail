@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
-  const { taxId, emails } = await req.json();
+  const { taxId, emails, name } = await req.json();
   console.log(taxId, emails);
 
   const filtered = emails.map((e: string) => e.trim()).filter(Boolean);
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
   let user;
   if (!existing) {
     user = await prisma.user.create({
-      data: { taxId, emails },
+      data: { taxId, emails, name },
     });
   } else {
     const merged = Array.from(new Set([...existing.emails, ...filtered]));

@@ -3,12 +3,14 @@ import { useState } from "react";
 
 interface EmailSelectionModalProps {
   emails: string[];
+  name: string;
   onClose: () => void;
   onSubmit: (selected: string[], newEmails: string[]) => Promise<void>;
 }
 
 export default function EmailSelectionModal({
   emails,
+  name,
   onClose,
   onSubmit,
 }: EmailSelectionModalProps) {
@@ -58,10 +60,14 @@ export default function EmailSelectionModal({
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-xl overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-4 border-b">
-          <h2 className="text-lg font-semibold text-gray-800">
+        <div className=" flex items-center justify-center bg-gray-50  px-4 py-2 ">
+          <h2 className="text-lg  font-semibold text-gray-800 mt-1">{name}</h2>
+        </div>
+        <div className="px-6 ">
+          <div className=" font-semibold text-gray-800">
             Select Email Recipients
-          </h2>
+          </div>
+
           <p className="text-sm text-gray-500 mt-1">
             Choose existing emails or add new ones
           </p>

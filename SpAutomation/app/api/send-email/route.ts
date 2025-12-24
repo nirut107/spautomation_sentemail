@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
   const DocID = form.getAll("DocID") as string[];
 
   console.log(DocID);
-  const isReply = DocID.length === 2;
+  let isReply = DocID.length === 2;
   let replyMID: string | null = null;
 
   if (isReply) {
@@ -32,7 +32,21 @@ export async function POST(req: NextRequest) {
       replyMID = i?.MID ?? null;
       if (i?.subject) subject = i.subject;
     }
+  } else {
+    const DocId = DocID[0];
+    try {
+      if (DocId.startsWith("QT-")) {
+        const existing = await prisma.quotation.findUnique({
+          where: { QID: DocId },
+        });
+        if (existing) {
+          isReply = true;
+          replyMID = existing.MID;
+        }
+      }
+    } catch {}
   }
+
   replyMID = replyMID?.trim().replace(/^"+|"+$/g, "") || null;
   const files = form.getAll("files") as File[];
 
@@ -99,9 +113,7 @@ export async function POST(req: NextRequest) {
           },
         });
       }
-    }
-
-    if (newDocId.startsWith("IN-")) {
+    } else if (newDocId.startsWith("IN-")) {
       await prisma.invoice.create({
         data: {
           IID: newDocId,

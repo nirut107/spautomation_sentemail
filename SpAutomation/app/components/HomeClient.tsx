@@ -3,6 +3,7 @@ import { useCallback, useState, useEffect } from "react";
 import AddUserModal from "@/app/components/AddUserModal";
 import EmailSelectionModal from "@/app/components/EmailSelectionModal";
 import { getText } from "@/app/util/text_message";
+import { fromBuffer } from "pdf2pic";
 
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
@@ -11,6 +12,7 @@ export default function Home() {
   const [modalOpenSent, setModalOpenSent] = useState(false);
   const [existingEmails, setExistingEmails] = useState<string[]>([]);
   const [docID, setDocID] = useState<string[]>([]);
+  const [name, setName] = useState<string>("");
   const [title, setTitle] = useState<string>("");
   const [orders, setOrder] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -19,13 +21,15 @@ export default function Home() {
   useEffect(() => {
     console.log(title, taxId, files, orders);
   }, [title]);
-  const showEmailSelectionModal = (emails: string[]) => {
+  const showEmailSelectionModal = (emails: string[], nameOCR: string) => {
     setExistingEmails(emails);
+    setName(nameOCR);
     setModalOpenSent(true);
   };
 
-  const openAddUserModal = (id: string) => {
+  const openAddUserModal = (id: string, nameOCR: string) => {
     setTaxId(id);
+    setName(nameOCR);
     setModalOpen(true);
   };
 
@@ -43,10 +47,13 @@ export default function Home() {
     try {
       await fetch("/api/user/create", {
         method: "POST",
-        body: JSON.stringify({ taxId, emails }),
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify({ taxId, emails, name }),
       });
       closeModal();
-      showEmailSelectionModal(emails);
+      showEmailSelectionModal(emails, name);
     } catch (err) {
       console.log(err);
       closeModal();
@@ -95,7 +102,6 @@ export default function Home() {
     }
     setLoading(false);
     setModalOpenSent(false);
-    
   };
 
   const handleSubmitEmailSelection = async (
@@ -106,6 +112,9 @@ export default function Home() {
       try {
         await fetch("api/user/update", {
           method: "PUT",
+          headers: {
+            "Content-Type": "application/json; charset=utf-8",
+          },
           body: JSON.stringify({
             taxId,
             emails: newEmails,
@@ -174,19 +183,25 @@ export default function Home() {
       body: form,
     });
 
-    const data = await res.json();
+    const resOCR = await fetch("/api/OCR", {
+      method: "POST",
+      body: form,
+    });
 
-    console.log(data.lines);
+    const dataOCR = await resOCR.json();
+    const data = await res.json();
+    const dataOCRLine = dataOCR.text.split("\n");
 
     const target: string = "CustomerNameIssueDateSalesman";
     const typeOfDac: string = "ใบเสนอราคา";
     const targetoder: string = "No.DescriptionQuantityUnitPriceAmount";
     let findOrder: boolean = false;
     let find: boolean = false;
-    let tmp_text: string;
     let tmpOrder: string[] = [];
     let tmpDoc: string[] = [];
     let foundTaxId: string = "";
+    let nameOCR: string = dataOCRLine[1];
+    setName(nameOCR);
 
     data.lines.find((line: string) => {
       const clean = line.replace(/\s+/g, "");
@@ -227,20 +242,6 @@ export default function Home() {
       if (clean.includes(targetoder)) {
         findOrder = true;
       }
-      if (clean.includes("QT-")) {
-        const match = clean.match(/QT-\d{9}/);
-        if (match) tmpDoc.push(match.toString());
-      }
-      if (clean.includes("IN-")) {
-        const match = clean.match(/IN-\d{9}/);
-        if (match) tmpDoc.push(match.toString());
-      }
-      if (clean.includes("RE-")) {
-        const match = clean.match(/RE-\d{9}/);
-        if (match) tmpDoc.push(match.toString());
-      }
-
-      tmp_text = clean;
     });
     if (tmpOrder.length > 0) {
       setOrder(tmpOrder);
@@ -249,17 +250,20 @@ export default function Home() {
     try {
       const resuser = await fetch("/api/user", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+        },
         body: JSON.stringify({ taxId }),
       });
       const data = await resuser.json();
       console.log(data);
 
       if (!data.exists) {
-        if (foundTaxId) openAddUserModal(foundTaxId);
+        if (foundTaxId) openAddUserModal(foundTaxId, nameOCR);
       } else {
         setTaxId(data.taxId);
-        console.log(data.taxId);
-        showEmailSelectionModal(data.emails);
+        console.log(data, "=============================");
+        showEmailSelectionModal(data.emails, data.name);
       }
     } catch (err) {
       console.log(err);
@@ -395,6 +399,7 @@ export default function Home() {
         {modalOpen && (
           <AddUserModal
             taxId={taxId}
+            name={name}
             onClose={closeModal}
             onSubmit={handleCreateUser}
           />
@@ -403,6 +408,7 @@ export default function Home() {
         {modalOpenSent && (
           <EmailSelectionModal
             emails={existingEmails}
+            name={name}
             onClose={closeModalSent}
             onSubmit={handleSubmitEmailSelection}
           />
