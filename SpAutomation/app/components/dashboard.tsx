@@ -2,62 +2,37 @@
 import { useEffect, useState } from "react";
 import SendEmailModal from "./SendEmailModal";
 import { OTCard } from "./OTCard";
+import { getGmailAuth } from "@/lib/gmailAuth";
 
 interface DashboardRow {
   taxId: string;
   company: string;
   OTD: string;
+  MID: string;
   IID: string | null;
   RID: string | null;
 }
 
-const MOCK_DASHBOARD_DATA: DashboardRow[] = [
-  {
-    taxId: "0115550001143",
-    company: "บริษัท กราฟฟิค อาร์ต ดีไซน์ จำกัด",
-    OTD: "QT-256811001",
-    IID: null,
-    RID: null,
-  },
-  {
-    taxId: "0125556019478",
-    company: "บริษัท เอ บี ซี อินดัสตรี จำกัด",
-    OTD: "QT-256811002",
-    IID: "IN-256812003",
-    RID: null,
-  },
-  {
-    taxId: "0135557012345",
-    company: "บริษัท เอส พี ออโตเมชั่น แอนด์ ซอฟต์แวร์ จำกัด",
-    OTD: "QT-256811003",
-    IID: "IN-256812004",
-    RID: "RE-256812006",
-  },
-  {
-    taxId: "0145558098765",
-    company: "บริษัท ไทยเทค โซลูชั่น จำกัด",
-    OTD: "QT-256811004",
-    IID: null,
-    RID: null,
-  },
-];
 
 export default function Home() {
   // const [data, setData] = useState<DashboardRow[]>([]);
   const [open, setOpen] = useState(false);
-  const [data] = useState(MOCK_DASHBOARD_DATA);
+  // const [data] = useState(MOCK_DASHBOARD_DATA);
   const [page, setPage] = useState(1);
-  const [rows, setRows] = useState<DashboardRow[]>([]);
-  const [totalPages, setTotalPages] = useState(3);
+  const [data, setRows] = useState<DashboardRow[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // useEffect(() => {
-  //   fetch(`/api/dashboard?page=${page}&limit=10`)
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       setRows(data.data);
-  //       setTotalPages(data.totalPages);
-  //     });
-  // }, [page]);
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/dashboard?page=${page}&limit=10`)
+      .then((res) => res.json())
+      .then((data) => {
+        setRows(data.data);
+        setTotalPages(data.totalPages);
+      });
+    setLoading(false);
+  }, [page]);
 
   const openSendModal = (row: DashboardRow) => {
     setOpen(true);
@@ -67,38 +42,80 @@ export default function Home() {
     <main className="flex flex-col items-center   min-h-screen bg-gray-50 p-6">
       <div className="flex justify-center items-center">
         <img src="/logo.png" className="w-30"></img>
-      <h1 className="text-3xl font-bold m-6 text-black" >SP Automation and software enginer</h1>
+        <h1 className="text-3xl font-bold m-6 text-black">
+          SP Automation and software enginer
+        </h1>
       </div>
-      
-      <div className="max-w-5xl mx-auto space-y-6">
-        
 
-        <div className="grid gap-4">
-          {data.map((row) => (
-            <OTCard key={row.OTD} row={row} />
-          ))}
-        </div>
-        <div className="flex justify-center gap-2 mt-6">
-          {Array.from({ length: totalPages }).map((_, i) => (
+      <div className="max-w-5xl mx-auto space-y-6">
+        {/* Loading */}
+        {loading && (
+          <div className="flex items-center justify-center h-80">
+            <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" />
+          </div>
+        )}
+
+        {/* Have data */}
+        {!loading && data.length > 0 && (
+          <div className="grid gap-4">
+            {data.map((row) => (
+              <OTCard key={row.OTD} row={row} />
+            ))}
+          </div>
+        )}
+
+        {/* No data */}
+        {!loading && data.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-80 rounded-3xl border-2 border-dashed border-amber-300 bg-amber-50 text-center px-6">
+            <div className="text-5xl mb-4">📄</div>
+
+            <h2 className="text-xl font-semibold text-amber-800">
+              No OT data yet
+            </h2>
+
+            <p className="text-amber-700 mt-2 max-w-md">
+              You haven’t sent any quotation or invoice yet. Start by sending a
+              new email to create your first OT process.
+            </p>
+
             <button
-              key={i}
-              onClick={() => setPage(i + 1)}
-              className={`px-3 py-1 border rounded  border-amber-950 text-black
+              onClick={() => setOpen(true)}
+              className="mt-6 px-6 py-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 transition"
+            >
+              Send New Email
+            </button>
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div className="flex justify-center gap-2 mt-6">
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setPage(i + 1)}
+                className={`px-3 py-1 border rounded  border-amber-950 text-black
         ${page === i + 1 ? "bg-blue-600 text-white" : ""}
       `}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
       <div>
-        <button
-          className="text-black mask-radial-at-bottom bg-green-500 mt-5 p-2 rounded-lg"
-          onClick={() => setOpen(true)}
-        >
-          Send New Email
-        </button>
+        {data.length != 0 && (
+          <button
+            onClick={() => setOpen(true)}
+            className="
+        mt-6 px-6 py-3 rounded-lg
+        bg-green-600 text-white font-medium
+        hover:bg-green-700 transition
+      "
+          >
+            Send New Email
+          </button>
+        )}
       </div>
 
       {open && <SendEmailModal onClose={() => setOpen(false)} />}

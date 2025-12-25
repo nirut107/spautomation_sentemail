@@ -5,6 +5,7 @@ import { useState } from "react";
 interface AddUserModalProps {
   taxId: string;
   name: string;
+  DocId: string[];
   onClose: () => void;
   onSubmit: (emails: string[]) => Promise<void>;
 }
@@ -12,6 +13,7 @@ interface AddUserModalProps {
 export default function AddUserModal({
   taxId,
   name,
+  DocId,
   onClose,
   onSubmit,
 }: AddUserModalProps) {
@@ -69,7 +71,8 @@ export default function AddUserModal({
           {/* Tax ID */}
           <div className="bg-gray-50 rounded-md px-4 py-2 text-sm">
             <span className="text-gray-500">Tax ID : </span>
-            <span className="font-semibold text-gray-800 mt-1">{taxId}</span><br/>
+            <span className="font-semibold text-gray-800 mt-1">{taxId}</span>
+            <br />
 
             <span className="text-gray-500">Customer Name : </span>
             <span className="font-semibold text-gray-800 mt-1">{name}</span>

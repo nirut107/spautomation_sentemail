@@ -33,6 +33,7 @@ export async function GET(req: Request) {
       return {
         taxId: q.taxId,
         company: q.company,
+        MID: q.MID,
         OTD: q.QID,
         IID: invoice?.IID ?? null,
         RID: receipt?.RID ?? null,

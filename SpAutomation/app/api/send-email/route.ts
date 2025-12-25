@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   const company = form.get("name") as string;
   const taxId = form.get("taxId") as string;
 
-  console.log(DocID);
+  console.log(DocID,taxId,company);
   let isReply = DocID.length === 2;
   let replyMID: string | null = null;
 
@@ -94,6 +94,7 @@ export async function POST(req: NextRequest) {
   const newDocId = DocID[0];
   try {
     if (newDocId.startsWith("QT-")) {
+      console.log(newDocId)
       const existing = await prisma.quotation.findUnique({
         where: { QID: newDocId },
       });
@@ -136,7 +137,8 @@ export async function POST(req: NextRequest) {
         },
       });
     }
-  } catch {
+  } catch(error) {
+    console.log(error)
     return NextResponse.json(
       { error: "This Email have already sent before" },
       { status: 400 }

@@ -3,6 +3,7 @@ import { useCallback, useState, useEffect } from "react";
 import AddUserModal from "@/app/components/AddUserModal";
 import EmailSelectionModal from "@/app/components/EmailSelectionModal";
 import { getText } from "@/app/util/text_message";
+import { useRouter } from "next/navigation";
 
 interface SendEmailModalProps {
   onClose: () => void;
@@ -21,12 +22,19 @@ export default function SendEmailModal({ onClose }: SendEmailModalProps) {
   const [loading, setLoading] = useState(false);
   const [creating, setCreat] = useState(false);
 
+  const router = useRouter();
+
   useEffect(() => {
     console.log(title, taxId, files, orders);
   }, [title]);
-  const showEmailSelectionModal = (emails: string[], nameOCR: string) => {
+  const showEmailSelectionModal = (
+    emails: string[],
+    nameOCR: string,
+    docId: string[]
+  ) => {
     setExistingEmails(emails);
     setName(nameOCR);
+    setDocID(docId);
     setModalOpenSent(true);
   };
 
@@ -56,7 +64,7 @@ export default function SendEmailModal({ onClose }: SendEmailModalProps) {
         body: JSON.stringify({ taxId, emails, name }),
       });
       closeModal();
-      showEmailSelectionModal(emails, name);
+      showEmailSelectionModal(emails, name, docID);
     } catch (err) {
       console.log(err);
       closeModal();
@@ -79,7 +87,7 @@ export default function SendEmailModal({ onClose }: SendEmailModalProps) {
     form.append("subject", subject);
     form.append("message", htmlMessage);
     form.append("name", name);
-    form.append("taxID", taxId);
+    form.append("taxId", taxId);
 
     files.forEach((file: File) => {
       form.append("files", file);
@@ -90,9 +98,6 @@ export default function SendEmailModal({ onClose }: SendEmailModalProps) {
     try {
       const res = await fetch("/api/send-email", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json; charset=utf-8",
-        },
         body: form,
       });
 
@@ -110,6 +115,7 @@ export default function SendEmailModal({ onClose }: SendEmailModalProps) {
     }
     setLoading(false);
     setModalOpenSent(false);
+    onClose();
   };
 
   const handleSubmitEmailSelection = async (
@@ -251,6 +257,18 @@ export default function SendEmailModal({ onClose }: SendEmailModalProps) {
       if (clean.includes(targetoder)) {
         findOrder = true;
       }
+      if (clean.includes("QT-")) {
+        const match = clean.match(/QT-\d{9}/);
+        if (match) tmpDoc.push(match.toString());
+      }
+      if (clean.includes("IN-")) {
+        const match = clean.match(/IN-\d{9}/);
+        if (match) tmpDoc.push(match.toString());
+      }
+      if (clean.includes("RE-")) {
+        const match = clean.match(/RE-\d{9}/);
+        if (match) tmpDoc.push(match.toString());
+      }
     });
     if (tmpOrder.length > 0) {
       setOrder(tmpOrder);
@@ -262,7 +280,7 @@ export default function SendEmailModal({ onClose }: SendEmailModalProps) {
         headers: {
           "Content-Type": "application/json; charset=utf-8",
         },
-        body: JSON.stringify({ taxId }),
+        body: JSON.stringify({ taxId: foundTaxId }),
       });
       const data = await resuser.json();
       console.log(data);
@@ -271,7 +289,7 @@ export default function SendEmailModal({ onClose }: SendEmailModalProps) {
         if (foundTaxId) openAddUserModal(foundTaxId, nameOCR);
       } else {
         setTaxId(data.taxId);
-        showEmailSelectionModal(data.emails, data.name);
+        showEmailSelectionModal(data.emails, data.name, tmpDoc);
       }
     } catch (err) {
       console.log(err);
@@ -363,8 +381,13 @@ export default function SendEmailModal({ onClose }: SendEmailModalProps) {
 
         {/* Action */}
         <div className="flex justify-end">
-          <button onClick={onClose} className="px-6 py-3 rounded-lg font-medium
-      flex items-center gap-2 bg-red-500 mr-3">Cancel</button>
+          <button
+            onClick={onClose}
+            className="px-6 py-3 rounded-lg font-medium
+      flex items-center gap-2 bg-red-500 mr-3"
+          >
+            Cancel
+          </button>
           <button
             onClick={handleNext}
             disabled={files.length === 0 || loading}
@@ -410,6 +433,7 @@ export default function SendEmailModal({ onClose }: SendEmailModalProps) {
           <AddUserModal
             taxId={taxId}
             name={name}
+            DocId={docID}
             onClose={closeModal}
             onSubmit={handleCreateUser}
           />
