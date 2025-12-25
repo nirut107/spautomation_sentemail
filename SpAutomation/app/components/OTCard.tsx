@@ -36,6 +36,7 @@ export function OTCard({ row }: Props) {
         window.location.href = data.authUrl;
         return;
       }
+      console.log(data)
 
       setMessages(data.messages);
       setCompany(company);
