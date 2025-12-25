@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import HomeClient from "./components/HomeClient";
+import Dashboard from "./components/dashboard"
 
 export default async function Page() {
   const cookieStore = await cookies();
@@ -9,5 +9,5 @@ export default async function Page() {
     return <meta httpEquiv="refresh" content="0; url=/login" />;
   }
 
-  return <HomeClient />;
+  return <Dashboard />;
 }

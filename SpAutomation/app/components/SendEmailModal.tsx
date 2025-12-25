@@ -3,9 +3,12 @@ import { useCallback, useState, useEffect } from "react";
 import AddUserModal from "@/app/components/AddUserModal";
 import EmailSelectionModal from "@/app/components/EmailSelectionModal";
 import { getText } from "@/app/util/text_message";
-import { fromBuffer } from "pdf2pic";
 
-export default function Home() {
+interface SendEmailModalProps {
+  onClose: () => void;
+}
+
+export default function SendEmailModal({ onClose }: SendEmailModalProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [taxId, setTaxId] = useState("");
@@ -268,7 +271,6 @@ export default function Home() {
         if (foundTaxId) openAddUserModal(foundTaxId, nameOCR);
       } else {
         setTaxId(data.taxId);
-        console.log(data, "=============================");
         showEmailSelectionModal(data.emails, data.name);
       }
     } catch (err) {
@@ -277,8 +279,8 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen w-full bg-gray-50 flex items-center justify-center p-6">
-      <div className="w-full max-w-2xl space-y-6">
+    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
+      <div className="w-full max-w-2xl space-y-6 p-30 bg-amber-50 border-2 rounded-2xl">
         {/* Header */}
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-800">Upload Documents</h1>
@@ -361,6 +363,8 @@ export default function Home() {
 
         {/* Action */}
         <div className="flex justify-end">
+          <button onClick={onClose} className="px-6 py-3 rounded-lg font-medium
+      flex items-center gap-2 bg-red-500 mr-3">Cancel</button>
           <button
             onClick={handleNext}
             disabled={files.length === 0 || loading}
@@ -420,6 +424,6 @@ export default function Home() {
           />
         )}
       </div>
-    </main>
+    </div>
   );
 }
