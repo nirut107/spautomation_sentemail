@@ -103,7 +103,7 @@ export function OTCard({ row }: Props) {
           </div>
         </div>
       )}
-      {openThread && (
+      {openThread &&(
         <EmailThreadModal
           open={openThread}
           onClose={() => setOpenThread(false)}
