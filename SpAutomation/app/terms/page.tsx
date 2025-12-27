@@ -1,6 +1,6 @@
-export function Privacy() {
+export default function Privacy() {
   return (
-    <>
+    <main>
       <h1>Terms of Service</h1>
 
       <p>
@@ -48,6 +48,6 @@ export function Privacy() {
         <br />
         <strong>Email:</strong> atipanyo107@gmail.com
       </p>
-    </>
+    </main>
   );
 }
