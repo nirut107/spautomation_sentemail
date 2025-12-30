@@ -36,9 +36,13 @@ export function OTCard({ row }: Props) {
         window.location.href = data.authUrl;
         return;
       }
-      console.log(data)
+      console.log(data);
+      if (data.error) {
+        setMessages([]);
+      } else {
+        setMessages(data.messages);
+      }
 
-      setMessages(data.messages);
       setCompany(company);
       setOpenThread(true);
     } catch (err) {
@@ -103,7 +107,7 @@ export function OTCard({ row }: Props) {
           </div>
         </div>
       )}
-      {openThread &&(
+      {openThread && (
         <EmailThreadModal
           open={openThread}
           onClose={() => setOpenThread(false)}
