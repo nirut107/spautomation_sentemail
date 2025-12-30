@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { CustomerFormModal } from "../components/CustomerFormModal";
 import { NewCustomerModal } from "../components/NewCustomerModal";
 import { useRouter } from "next/navigation";
+import LoadingScreen from "../components/LoadingScreen";
 
 interface Customer {
   id: number;
@@ -17,6 +18,7 @@ export default function CustomersPage() {
   const [openModal, setOpenModal] = useState(false);
   const [openModelEdit, setOpenModalEdit] = useState(false);
   const [initial, setInitial] = useState<Customer>();
+  const [loading, setLoading] = useState<boolean>(true);
 
   const router = useRouter();
 
@@ -27,6 +29,7 @@ export default function CustomersPage() {
     const data = await res.json();
     console.log(data, "customers");
     setCustomers(data);
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -43,6 +46,7 @@ export default function CustomersPage() {
     });
   }
   async function handleClickDelete(c: Customer) {
+    setLoading(true);
     try {
       const res = await fetch("/api/customers", {
         method: "DELETE",
@@ -51,15 +55,18 @@ export default function CustomersPage() {
     } catch (e) {
       console.error(e);
     }
-    fetchCustomers();
+    await fetchCustomers();
   }
 
-  return (
-    <main className="min-h-screen bg-gray-50 flex justify-center pt-20 px-4">
-      <div className="w-full max-w-4xl space-y-6">
-        <button
-          onClick={() => router.push("/")}
-          className="
+  if (loading) {
+    return <LoadingScreen />;
+  } else {
+    return (
+      <main className="min-h-screen bg-gray-50 flex justify-center pt-20 px-4">
+        <div className="w-full max-w-4xl space-y-6">
+          <button
+            onClick={() => router.push("/")}
+            className="
     flex items-center gap-2
     bg-gray-700 border
     px-4 py-2 rounded-lg
@@ -70,60 +77,60 @@ export default function CustomersPage() {
     transition
     cursor-pointer
   "
-        >
-          ← Dashboard
-        </button>
-
-        {/* Header */}
-        <div className="flex-col text-center mt-10">
-          <h1 className="text-3xl font-bold text-black">👥 Customers</h1>
-          <p className="text-gray-500 mt-1">
-            Search, add, edit or delete customers
-          </p>
-        </div>
-
-        {/* Search + Add */}
-        <div className="flex gap-3">
-          <input
-            placeholder="Search by company, tax ID, email"
-            className="flex-1 border rounded-lg px-4 py-2 text-black"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-
-          <button
-            onClick={() => setOpenModal(true)}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
           >
-            + New Customer
+            ← Dashboard
           </button>
-        </div>
 
-        {/* List (mock empty state) */}
-        {customers.length === 0 ? (
-          <div className="h-60 flex flex-col items-center justify-center rounded-xl border-2 border-dashed bg-white">
-            <div className="text-4xl mb-3">📄</div>
-            <p className="text-gray-600">No customers found</p>
+          {/* Header */}
+          <div className="flex-col text-center mt-10">
+            <h1 className="text-3xl font-bold text-black">👥 Customers</h1>
+            <p className="text-gray-500 mt-1">
+              Search, add, edit or delete customers
+            </p>
           </div>
-        ) : (
-          <div className="space-y-3">
-            {customers.map((c: Customer) => (
-              <div
-                key={c.id}
-                className="bg-white rounded-xl border p-4 flex justify-between items-center"
-              >
-                <div>
-                  <div className="font-semibold text-black">{c.name}</div>
-                  <div className="text-sm text-gray-500">{c.taxId}</div>
-                  <div className="text-sm text-gray-400">
-                    {c.emails.join(", ")}
+
+          {/* Search + Add */}
+          <div className="flex gap-3">
+            <input
+              placeholder="Search by company, tax ID, email"
+              className="flex-1 border rounded-lg px-4 py-2 text-black"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+
+            <button
+              onClick={() => setOpenModal(true)}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+            >
+              + New Customer
+            </button>
+          </div>
+
+          {/* List (mock empty state) */}
+          {customers.length === 0 ? (
+            <div className="h-60 flex flex-col items-center justify-center rounded-xl border-2 border-dashed bg-white">
+              <div className="text-4xl mb-3">📄</div>
+              <p className="text-gray-600">No customers found</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {customers.map((c: Customer) => (
+                <div
+                  key={c.id}
+                  className="bg-white rounded-xl border p-4 flex justify-between items-center"
+                >
+                  <div>
+                    <div className="font-semibold text-black">{c.name}</div>
+                    <div className="text-sm text-gray-500">{c.taxId}</div>
+                    <div className="text-sm text-gray-400">
+                      {c.emails.join(", ")}
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-2">
-                  {/* Edit */}
-                  <button
-                    onClick={() => handleClickEdit(c)}
-                    className="
+                  <div className="flex gap-2">
+                    {/* Edit */}
+                    <button
+                      onClick={() => handleClickEdit(c)}
+                      className="
       inline-flex items-center gap-2
       px-4 py-2 rounded-lg
       text-sm font-medium
@@ -133,14 +140,14 @@ export default function CustomersPage() {
       hover:text-blue-800
       transition
     "
-                  >
-                    ✏️ Edit
-                  </button>
+                    >
+                      ✏️ Edit
+                    </button>
 
-                  {/* Delete */}
-                  <button
-                    onClick={() => handleClickDelete(c)}
-                    className="
+                    {/* Delete */}
+                    <button
+                      onClick={() => handleClickDelete(c)}
+                      className="
       inline-flex items-center gap-2
       px-4 py-2 rounded-lg
       text-sm font-medium
@@ -150,31 +157,32 @@ export default function CustomersPage() {
       hover:text-red-800
       transition
     "
-                  >
-                    🗑 Delete
-                  </button>
+                    >
+                      🗑 Delete
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
 
-        {/* Modal */}
-        {openModal && (
-          <NewCustomerModal
-            onClose={() => setOpenModal(false)}
-            onNew={() => fetchCustomers()}
-          />
-        )}
-        {openModelEdit && (
-          <CustomerFormModal
-            open={openModelEdit}
-            onClose={() => setOpenModalEdit(false)}
-            onEdited={() => fetchCustomers()}
-            initial={initial}
-          />
-        )}
-      </div>
-    </main>
-  );
+          {/* Modal */}
+          {openModal && (
+            <NewCustomerModal
+              onClose={() => setOpenModal(false)}
+              onNew={() => fetchCustomers()}
+            />
+          )}
+          {openModelEdit && (
+            <CustomerFormModal
+              open={openModelEdit}
+              onClose={() => setOpenModalEdit(false)}
+              onEdited={() => fetchCustomers()}
+              initial={initial}
+            />
+          )}
+        </div>
+      </main>
+    );
+  }
 }
