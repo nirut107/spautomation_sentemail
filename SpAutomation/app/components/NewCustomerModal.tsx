@@ -1,9 +1,27 @@
 import { useState } from "react";
 
-export function NewCustomerModal({ onClose }: { onClose: () => void }) {
+interface Props {
+  onClose: () => void;
+  onNew: () => Promise<void>;
+}
+
+export function NewCustomerModal({ onClose, onNew }: Props) {
   const [name, setName] = useState("");
   const [taxId, setTaxId] = useState("");
   const [emails, setEmails] = useState<string[]>([""]);
+
+  async function handleClick() {
+    try {
+      const res = await fetch("/api/customers", {
+        method: "PUT",
+        body: JSON.stringify({ taxId, emails, name }),
+      });
+    } catch (e) {
+      console.error(e);
+    }
+    await onNew();
+    onClose();
+  }
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -49,7 +67,10 @@ export function NewCustomerModal({ onClose }: { onClose: () => void }) {
           <button onClick={onClose} className="px-4 py-2 rounded bg-red-400">
             Cancel
           </button>
-          <button className="bg-green-600 text-white px-4 py-2 rounded">
+          <button
+            className="bg-green-600 text-white px-4 py-2 rounded"
+            onClick={handleClick}
+          >
             Save
           </button>
         </div>

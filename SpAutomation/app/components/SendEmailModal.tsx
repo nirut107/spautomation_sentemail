@@ -301,9 +301,12 @@ export default function SendEmailModal({ onClose }: SendEmailModalProps) {
       <div className="w-full max-w-2xl space-y-6 p-30 bg-amber-50 border-2 rounded-2xl">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-800">Upload Documents</h1>
-          <p className="text-gray-500 mt-1">
-            Upload quotation, invoice, or related files
+          <h1 className="text-xl font-medium text-gray-900">
+            Upload documents
+          </h1>
+
+          <p className="mt-1 text-sm text-gray-500">
+            Drag and drop files or browse from your computer
           </p>
         </div>
 

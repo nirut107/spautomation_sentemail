@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import SendEmailModal from "./SendEmailModal";
 import { OTCard } from "./OTCard";
 import { getGmailAuth } from "@/lib/gmailAuth";
+import { useRouter } from 'next/navigation';
 
 interface DashboardRow {
   taxId: string;
@@ -12,6 +13,7 @@ interface DashboardRow {
   IID: string | null;
   RID: string | null;
 }
+
 
 
 export default function Home() {
@@ -33,6 +35,8 @@ export default function Home() {
       });
     setLoading(false);
   }, [page]);
+  const router = useRouter();
+  
 
   const openSendModal = (row: DashboardRow) => {
     setOpen(true);
@@ -105,16 +109,29 @@ export default function Home() {
       </div>
       <div>
         {data.length != 0 && (
-          <button
-            onClick={() => setOpen(true)}
-            className="
+          <div>
+            <button
+              onClick={() => router.push("/customers")}
+              className="
+        m-6 px-6 py-3 rounded-lg
+        bg-blue-500 text-white font-medium
+        hover:bg-blue-950
+      "
+            >
+              Edit Customer
+            </button>
+
+            <button
+              onClick={() => setOpen(true)}
+              className="
         mt-6 px-6 py-3 rounded-lg
         bg-green-600 text-white font-medium
         hover:bg-green-700 transition
       "
-          >
-            Send New Email
-          </button>
+            >
+              Send New Email
+            </button>
+          </div>
         )}
       </div>
 

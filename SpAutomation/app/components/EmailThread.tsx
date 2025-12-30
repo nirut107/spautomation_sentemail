@@ -59,8 +59,18 @@ export function EmailThread({ messages }: { messages: any[] }) {
           );
         })
       ) : (
-        <div className="mt-40 text-black whitespace-pre-wrap text-lg">
-          This Email have deleted!
+        <div className="text-black whitespace-pre-wrap text-lg">
+          <div className="flex flex-col items-center justify-center mt-32 text-center text-gray-700">
+            <div className="text-6xl mb-4">📭</div>
+
+            <h2 className="text-xl font-medium text-gray-900">
+              Email not available
+            </h2>
+
+            <p className="mt-2 text-sm text-gray-500 max-w-md">
+              This email thread has been deleted or is no longer accessible.
+            </p>
+          </div>
         </div>
       )}
     </div>

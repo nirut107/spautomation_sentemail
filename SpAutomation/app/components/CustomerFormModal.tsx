@@ -2,19 +2,35 @@ import { useState } from "react";
 interface Props {
   open: boolean;
   onClose: () => void;
+  onEdited: () => Promise<void>;
   initial?: {
+    id: number;
     taxId: string;
     name: string;
     emails: string[];
   };
 }
 
-export function CustomerFormModal({ open, onClose, initial }: Props) {
+export function CustomerFormModal({ open, onClose, onEdited, initial }: Props) {
+  const [id, setID] = useState(initial?.id ?? "");
   const [name, setName] = useState(initial?.name ?? "");
   const [taxId, setTaxId] = useState(initial?.taxId ?? "");
   const [emails, setEmails] = useState<string[]>(initial?.emails ?? [""]);
 
   if (!open) return null;
+
+  async function handleClick() {
+    try {
+      const res = await fetch("/api/customers", {
+        method: "PUT",
+        body: JSON.stringify({ taxId, emails, name }),
+      });
+    } catch (e) {
+      console.error(e);
+    }
+    await onEdited();
+    onClose();
+  }
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -61,7 +77,10 @@ export function CustomerFormModal({ open, onClose, initial }: Props) {
 
         <div className="flex justify-end gap-3">
           <button onClick={onClose}>Cancel</button>
-          <button className="bg-green-600 text-white px-4 py-2 rounded">
+          <button
+            className="bg-green-600 text-white px-4 py-2 rounded"
+            onClick={handleClick}
+          >
             Save
           </button>
         </div>
