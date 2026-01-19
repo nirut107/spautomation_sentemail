@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     attachments: [
       {
         filename: "logo.png",
-        path: "/public/logo.png",
+        path: "https://spautomation-sentemail.vercel.app/logo.png",
         cid: "logo",
       },
       ...attachments,
