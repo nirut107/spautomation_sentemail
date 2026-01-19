@@ -4,6 +4,17 @@ import AddUserModal from "@/app/components/AddUserModal";
 import EmailSelectionModal from "@/app/components/EmailSelectionModal";
 import { getText } from "@/app/util/text_message";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ClockArrowUp,
+  X,
+  CheckCircle,
+  Loader2,
+  ScanLine,
+  Mail,
+  ArrowRight,
+  Trash2,
+} from "lucide-react";
 
 interface SendEmailModalProps {
   onClose: () => void;
@@ -297,141 +308,152 @@ export default function SendEmailModal({ onClose }: SendEmailModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center">
-      <div className="w-full max-w-2xl space-y-6 p-30 bg-amber-50 border-2 rounded-2xl">
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-xl font-medium text-gray-900">
-            Upload documents
-          </h1>
+    <div className="fixed inset-0 z-50 bg-[#050505]/90 backdrop-blur-sm flex items-center justify-center p-4 selection:bg-orange-500/30">
+      {/* Background Glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-blue-600/10 blur-[120px] rounded-full" />
 
-          <p className="mt-1 text-sm text-gray-500">
-            Drag and drop files or browse from your computer
-          </p>
-        </div>
-
-        {/* Drop Zone */}
-        <div
-          className="
-        w-full min-h-[220px]
-        border-2 border-dashed border-gray-300
-        rounded-xl bg-white
-        flex flex-col items-center justify-center
-        cursor-pointer
-        transition
-        hover:border-blue-500 hover:bg-blue-50
-      "
-          onDrop={handleDrop}
-          onDragOver={(e) => e.preventDefault()}
-          onClick={() => document.getElementById("fileInput")?.click()}
-        >
-          <p className="text-gray-600 font-medium">Drag & Drop files here</p>
-          <p className="text-sm text-gray-400 mt-1">First file must be PDF</p>
-        </div>
-
-        <input
-          id="fileInput"
-          type="file"
-          className="hidden"
-          multiple
-          onChange={handleBrowse}
-        />
-
-        {/* File List */}
-        {files.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border p-4">
-            <h2 className="font-semibold text-gray-700 mb-3">Files Selected</h2>
-
-            <ul className="space-y-2">
-              {files.map((file, index) => (
-                <li
-                  key={index}
-                  className="
-                flex items-center justify-between
-                rounded-md px-3 py-2
-                bg-gray-50
-              "
-                >
-                  <span
-                    className={`
-                  truncate
-                  ${
-                    index === 0
-                      ? "text-blue-700 font-semibold"
-                      : "text-gray-700"
-                  }
-                `}
-                  >
-                    {index === 0 && (
-                      <span className="mr-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
-                        PDF
-                      </span>
-                    )}
-                    {file.name}
-                  </span>
-
-                  <button
-                    onClick={() => removeFile(index)}
-                    className="text-red-500 hover:text-red-600 text-sm"
-                  >
-                    Remove
-                  </button>
-                </li>
-              ))}
-            </ul>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="relative w-full max-w-2xl bg-[#0f1115]/80 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] shadow-2xl shadow-black overflow-hidden"
+      >
+        {/* Header Section */}
+        <div className="p-8 border-b border-white/5">
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
+                <ScanLine className="w-6 h-6 text-blue-500" /> System_Scan.exe
+              </h1>
+              <p className="text-gray-500 font-mono text-xs mt-2 uppercase tracking-widest">
+                OCR Processing Unit | Active Level: 11.68
+              </p>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-white/5 rounded-full transition-colors text-gray-500 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-        )}
+        </div>
 
-        {/* Action */}
-        <div className="flex justify-end">
+        <div className="p-8 space-y-8">
+          {/* Drop Zone */}
+          <motion.div
+            onDrop={handleDrop}
+            onDragOver={(e) => e.preventDefault()}
+            onClick={() => document.getElementById("fileInput")?.click()}
+            whileHover={{
+              borderColor: "rgba(59, 130, 246, 0.5)",
+              backgroundColor: "rgba(59, 130, 246, 0.05)",
+            }}
+            className="group relative w-full min-h-[200px] border-2 border-dashed border-white/10 rounded-3xl flex flex-col items-center justify-center cursor-pointer transition-all duration-300"
+          >
+            <div className="p-4 bg-blue-500/10 rounded-2xl group-hover:scale-110 transition-transform">
+              <ClockArrowUp className="w-10 h-10 text-blue-500" />
+            </div>
+            <p className="mt-4 text-white font-bold tracking-tight">
+              Injection Protocol
+            </p>
+            <p className="text-sm text-gray-500 mt-1 font-mono">
+              DRAG & DROP OR BROWSE SYSTEM
+            </p>
+            <input
+              id="fileInput"
+              type="file"
+              className="hidden"
+              multiple
+              onChange={handleBrowse}
+            />
+          </motion.div>
+
+          {/* File Queue - Visualizing your Array State */}
+          <AnimatePresence>
+            {files.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="space-y-3"
+              >
+                <h2 className="text-xs font-black text-gray-500 uppercase tracking-[0.2em] px-2">
+                  Data_Queue
+                </h2>
+                <div className="space-y-2 max-h-[180px] overflow-y-auto pr-2 custom-scrollbar">
+                  {files.map((file, index) => (
+                    <motion.div
+                      layout
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      key={index}
+                      className="flex items-center justify-between p-4 bg-white/[0.03] border border-white/5 rounded-2xl group hover:bg-white/[0.05] transition-all"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div
+                          className={`p-2 rounded-lg ${
+                            index === 0
+                              ? "bg-blue-500/20 text-blue-400"
+                              : "bg-white/5 text-gray-500"
+                          }`}
+                        >
+                          {/* <FilePdf className="w-5 h-5" /> */}
+                        </div>
+                        <div className="max-w-[300px]">
+                          <p className="text-sm font-bold text-white truncate">
+                            {file.name}
+                          </p>
+                          <p className="text-[10px] text-gray-500 font-mono">
+                            SIZE: {(file.size / 1024).toFixed(1)} KB
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => removeFile(index)}
+                        className="p-2 text-gray-600 hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="p-8 bg-white/[0.02] border-t border-white/5 flex justify-end gap-4">
           <button
             onClick={onClose}
-            className="px-6 py-3 rounded-lg font-medium
-      flex items-center gap-2 bg-red-500 mr-3"
+            className="px-6 py-3 rounded-2xl font-bold text-gray-500 hover:text-white hover:bg-white/5 transition-all text-sm uppercase tracking-widest"
           >
-            Cancel
+            Abort
           </button>
           <button
             onClick={handleNext}
             disabled={files.length === 0 || loading}
             className={`
-      px-6 py-3 rounded-lg font-medium
-      flex items-center gap-2
-      ${
-        loading
-          ? "bg-gray-400 cursor-not-allowed"
-          : "bg-blue-600 hover:bg-blue-700"
-      }
-      text-white transition
-    `}
+              relative overflow-hidden px-8 py-3 rounded-2xl font-black text-sm uppercase tracking-widest
+              flex items-center gap-3 transition-all transform active:scale-95
+              ${
+                loading
+                  ? "bg-gray-800 text-gray-500 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-500 text-white shadow-[0_0_30px_rgba(37,99,235,0.3)]"
+              }
+            `}
           >
-            {loading && (
-              <svg
-                className="animate-spin h-5 w-5 text-white"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  fill="none"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                />
-              </svg>
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" /> Processing_Data
+              </>
+            ) : (
+              <>
+                Initialize_Scan <ArrowRight className="w-4 h-4" />
+              </>
             )}
-
-            {loading ? "Processing..." : "Continue"}
           </button>
         </div>
 
-        {/* Modals */}
+        {/* Keeping your logical modals */}
         {modalOpen && (
           <AddUserModal
             taxId={taxId}
@@ -441,7 +463,6 @@ export default function SendEmailModal({ onClose }: SendEmailModalProps) {
             onSubmit={handleCreateUser}
           />
         )}
-
         {modalOpenSent && (
           <EmailSelectionModal
             emails={existingEmails}
@@ -450,7 +471,7 @@ export default function SendEmailModal({ onClose }: SendEmailModalProps) {
             onSubmit={handleSubmitEmailSelection}
           />
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }
